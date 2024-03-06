@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Megrim&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Megrim', cursive;
+      background: linear-gradient(120deg, #2980B9, #6DD5FA);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    h1 {
+      font-family: 'Bangers', cursive;
+      color: #fff;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+      margin-top: 20px;
+    }
+
+    .cell {
+      background-color: #fff;
+      border: 2px solid #2980B9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 36px;
+      color: #2980B9;
+      cursor: pointer;
+    }
+
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .btn {
+      background-color: #2980B9;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      margin-top: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Tic Tac Toe</h1>
+    <div class="board"></div>
+  </div>
+
+  <div class="popup" id="gameOverPopup">
+    <div class="popup-content">
+      <h2 id="popupText"></h2>
+      <button class="btn" onclick="restart()">Restart</button>
+    </div>
+  </div>
+
+  <script>
+    const board = document.querySelector('.board');
+    const popup = document.getElementById('gameOverPopup');
+    const popupText = document.getElementById('popupText');
+
+    let currentPlayer = 'X';
+    let boardState = ['', '', '', '', '', '', '', '', ''];
+    let gameActive = true;
+
+    const winningConditions = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6]
+    ];
+
+    function handleCellClick(clickedCell, clickedCellIndex) {
+      boardState[clickedCellIndex] = currentPlayer;
+      clickedCell.innerText = currentPlayer;
+
+      let roundWon = false;
+      for (let i = 0; i < winningConditions.length; i++) {
+        const [a, b, c] = winningConditions[i];
+        if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+          roundWon = true;
+          break;
+        }
+      }
+
+      if (roundWon) {
+        popupText.innerText = `${currentPlayer} wins!`;
+        gameActive = false;
+        popup.style.display = 'flex';
+        return;
+      }
+
+      if (!boardState.includes('')) {
+        popupText.innerText = "It's a draw!";
+        gameActive = false;
+        popup.style.display = 'flex';
+        return;
+      }
+
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      if (currentPlayer === 'O') {
+        computerTurn();
+      }
+    }
+
+    function computerTurn() {
+      const availableCells = boardState
+        .map((cell, index) => cell === '' ? index : null)
+        .filter(cell => cell !== null);
+      const randomIndex = Math.floor(Math.random() * availableCells.length);
+      const cellIndex = availableCells[randomIndex];
+      const cell = board.children[cellIndex];
+      handleCellClick(cell, cellIndex);
+    }
+
+    function restart() {
+      currentPlayer = 'X';
+      boardState = ['', '', '', '', '', '', '', '', ''];
+      gameActive = true;
+      popup.style.display = 'none';
+      document.querySelectorAll('.cell').forEach(cell => cell.innerText = '');
+    }
+
+    function createBoard() {
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.addEventListener('click', () => {
+          if (gameActive && boardState[i] === '') {
+            handleCellClick(cell, i);
+          }
+        });
+        board.appendChild(cell);
+      }
+    }
+
+    createBoard();
+  </script>
+</body>
+</html>
